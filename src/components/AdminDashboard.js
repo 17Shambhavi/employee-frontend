@@ -13,11 +13,14 @@ function AdminDashboard({ token, onLogout }) {
     const [newPassword, setNewPassword] = useState('');
     const [addMsg, setAddMsg] = useState('');
     const [pendingLeaves, setPendingLeaves] = useState([]);
+    const [insights, setInsights] = useState(null);
 
     useEffect(() => {
         loadEmployees();
         loadPendingLeaves();
         loadTodayAttendance();
+        loadInsights();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const loadEmployees = async () => {
@@ -46,6 +49,16 @@ function AdminDashboard({ token, onLogout }) {
         if (res.ok) {
             const data = await res.json();
             setStatPresent(data.presentCount || 0);
+        }
+    };
+
+    const loadInsights = async () => {
+        const res = await fetch('http://localhost:8080/api/admin/attendance/insights', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            setInsights(data);
         }
     };
 
@@ -99,10 +112,10 @@ function AdminDashboard({ token, onLogout }) {
     };
 
     const tabLabels = {
-        dashboard: '📊 Dashboard',
-        employees: '👥 Employees',
-        addEmployee: '➕ Add Employee',
-        leaves: '📋 Leave Approval'
+        dashboard: 'Dashboard',
+        employees: 'Employees',
+        addEmployee: 'Add Employee',
+        leaves: 'Leave Approval'
     };
 
     return (
@@ -117,9 +130,9 @@ function AdminDashboard({ token, onLogout }) {
             `}</style>
 
             <div style={styles.navbar}>
-                <span>🏢 Employee Management System</span>
+                <span>Employee Management System</span>
                 <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                    <span style={styles.adminBadge}>👑 Admin</span>
+                    <span style={styles.adminBadge}>Admin</span>
                     <button className="nav-btn" style={styles.logoutBtn} onClick={onLogout}>Logout</button>
                 </div>
             </div>
@@ -144,29 +157,37 @@ function AdminDashboard({ token, onLogout }) {
             <div style={styles.content}>
 
                 {activeTab === 'dashboard' && (
-                    <div style={styles.statCards}>
-                        <div className="stat-card" style={{...styles.statCard, borderTop: '4px solid #3b82f6'}}>
-                            <div style={{...styles.statIcon, background: '#dbeafe'}}>👥</div>
-                            <div style={{...styles.statNum, color: '#3b82f6'}}>{employees.length}</div>
-                            <div style={styles.statLabel}>Total Employees</div>
-                        </div>
-                        <div className="stat-card" style={{...styles.statCard, borderTop: '4px solid #10b981'}}>
-                            <div style={{...styles.statIcon, background: '#d1fae5'}}>✅</div>
-                            <div style={{...styles.statNum, color: '#10b981'}}>{statPresent}</div>
-                            <div style={styles.statLabel}>Present Today</div>
-                        </div>
-                        <div className="stat-card" style={{...styles.statCard, borderTop: '4px solid #f59e0b'}}>
-                            <div style={{...styles.statIcon, background: '#fef3c7'}}>🏖️</div>
-                            <div style={{...styles.statNum, color: '#f59e0b'}}>{statLeaves}</div>
-                            <div style={styles.statLabel}>Pending Leaves</div>
-                        </div>
-                        <div className="stat-card" style={{...styles.statCard, borderTop: '4px solid #8b5cf6'}}>
-                            <div style={{...styles.statIcon, background: '#ede9fe'}}>🏢</div>
-                            <div style={{...styles.statNum, color: '#8b5cf6'}}>
-                                {new Set(employees.map(e => e.department)).size}
+                    <div>
+                        <div style={styles.statCards}>
+                            <div className="stat-card" style={{...styles.statCard, borderTop: '4px solid #3b82f6'}}>
+                                <div style={{...styles.statNum, color: '#3b82f6'}}>{employees.length}</div>
+                                <div style={styles.statLabel}>Total Employees</div>
                             </div>
-                            <div style={styles.statLabel}>Departments</div>
+                            <div className="stat-card" style={{...styles.statCard, borderTop: '4px solid #10b981'}}>
+                                <div style={{...styles.statNum, color: '#10b981'}}>{statPresent}</div>
+                                <div style={styles.statLabel}>Present Today</div>
+                            </div>
+                            <div className="stat-card" style={{...styles.statCard, borderTop: '4px solid #f59e0b'}}>
+                                <div style={{...styles.statNum, color: '#f59e0b'}}>{statLeaves}</div>
+                                <div style={styles.statLabel}>Pending Leaves</div>
+                            </div>
+                            <div className="stat-card" style={{...styles.statCard, borderTop: '4px solid #8b5cf6'}}>
+                                <div style={{...styles.statNum, color: '#8b5cf6'}}>
+                                    {new Set(employees.map(e => e.department)).size}
+                                </div>
+                                <div style={styles.statLabel}>Departments</div>
+                            </div>
                         </div>
+
+                        {insights && (
+                            <div style={styles.insightCard}>
+                                <div style={styles.insightHeader}>
+                                    <span style={styles.insightTag}>Smart Insight</span>
+                                    <span style={styles.insightRate}>{insights.attendanceRate}% attendance this week</span>
+                                </div>
+                                <p style={styles.insightText}>{insights.summary}</p>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -174,7 +195,7 @@ function AdminDashboard({ token, onLogout }) {
                     <div style={styles.card}>
                         <div style={styles.cardHeader}>
                             <h2 style={styles.cardTitle}>All Employees</h2>
-                            <button className="action-btn" style={styles.btnOutline} onClick={loadEmployees}>🔄 Refresh</button>
+                            <button className="action-btn" style={styles.btnOutline} onClick={loadEmployees}>Refresh</button>
                         </div>
                         <div style={{overflowX: 'auto'}}>
                             <table style={styles.table}>
@@ -223,14 +244,14 @@ function AdminDashboard({ token, onLogout }) {
                             />
                         </div>
                         <div style={styles.divider}></div>
-                        <p style={styles.sectionLabel}>🔑 Login Credentials</p>
+                        <p style={styles.sectionLabel}>Login Credentials</p>
                         <div style={styles.formGrid}>
                             <input className="modern-input" style={styles.input} placeholder="Username"
                                    value={newUsername} onChange={e => setNewUsername(e.target.value)} />
                             <input className="modern-input" style={styles.input} type="password" placeholder="Password"
                                    value={newPassword} onChange={e => setNewPassword(e.target.value)} />
                         </div>
-                        <button className="action-btn" style={styles.btnGreen} onClick={addEmployee}>➕ Add Employee</button>
+                        <button className="action-btn" style={styles.btnGreen} onClick={addEmployee}>Add Employee</button>
                         {addMsg && (
                             <p style={{
                                 color: addMsg.startsWith('success') ? '#059669' : '#dc2626',
@@ -246,7 +267,7 @@ function AdminDashboard({ token, onLogout }) {
                     <div style={styles.card}>
                         <div style={styles.cardHeader}>
                             <h2 style={styles.cardTitle}>Leave Approval</h2>
-                            <button className="action-btn" style={styles.btnOutline} onClick={loadPendingLeaves}>🔄 Refresh</button>
+                            <button className="action-btn" style={styles.btnOutline} onClick={loadPendingLeaves}>Refresh</button>
                         </div>
                         <div style={{overflowX: 'auto'}}>
                             <table style={styles.table}>
@@ -259,7 +280,7 @@ function AdminDashboard({ token, onLogout }) {
                                 </thead>
                                 <tbody>
                                 {pendingLeaves.length === 0 ? (
-                                    <tr><td colSpan="5" style={{textAlign:'center', padding:'30px', color:'#9ca3af'}}>No pending leaves 🎉</td></tr>
+                                    <tr><td colSpan="5" style={{textAlign:'center', padding:'30px', color:'#9ca3af'}}>No pending leaves</td></tr>
                                 ) : pendingLeaves.map(l => (
                                     <tr key={l.id}>
                                         <td style={styles.td}>{l.employeeId}</td>
@@ -318,13 +339,22 @@ const styles = {
         padding: '22px', textAlign: 'center', boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
         transition: 'all 0.25s'
     },
-    statIcon: {
-        width: '44px', height: '44px', borderRadius: '50%',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: '20px', margin: '0 auto 10px'
-    },
     statNum: { fontSize: '32px', fontWeight: '700' },
     statLabel: { color: '#6b7280', marginTop: '4px', fontSize: '13px', fontWeight: '500' },
+    insightCard: {
+        marginTop: '20px', background: 'linear-gradient(135deg, #eef2ff, #f5f3ff)',
+        border: '1px solid #e0e7ff', borderRadius: '14px', padding: '20px 24px'
+    },
+    insightHeader: {
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        marginBottom: '10px', flexWrap: 'wrap', gap: '8px'
+    },
+    insightTag: {
+        background: '#6366f1', color: 'white', fontSize: '11px', fontWeight: '600',
+        padding: '4px 10px', borderRadius: '20px', textTransform: 'uppercase', letterSpacing: '0.5px'
+    },
+    insightRate: { color: '#4f46e5', fontWeight: '700', fontSize: '14px' },
+    insightText: { color: '#374151', fontSize: '14px', lineHeight: '1.6', margin: 0 },
     formGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '4px 12px' },
     input: {
         width: '100%', padding: '11px 14px', margin: '6px 0',
@@ -358,5 +388,4 @@ const styles = {
         fontSize: '13px', fontWeight: '500', transition: 'all 0.2s'
     },
 };
-
 export default AdminDashboard;
