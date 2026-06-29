@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Login from './components/Login';
 import AdminDashboard from './components/AdminDashboard';
 import EmployeeDashboard from './components/EmployeeDashboard';
+import HRDashboard from './components/HRDashboard';
 
 function App() {
     const [user, setUser] = useState(null);
@@ -24,6 +25,11 @@ function App() {
                 <Login onLogin={handleLogin} />
             ) : user.role === 'ADMIN' ? (
                 <AdminDashboard
+                    token={user.token}
+                    onLogout={handleLogout}
+                />
+            ) : user.role === 'HR' ? (
+                <HRDashboard
                     token={user.token}
                     onLogout={handleLogout}
                 />
