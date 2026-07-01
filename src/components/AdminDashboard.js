@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-
-const GROQ_API_KEY = "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";
-
+const GROQ_API_KEY = process.env.REACT_APP_GROQ_API_KEY;
 function AdminDashboard({ token, onLogout }) {
     const [employees, setEmployees] = useState([]);
     const [statPresent, setStatPresent] = useState(0);

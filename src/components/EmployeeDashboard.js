@@ -14,6 +14,16 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
     const [confirmPass, setConfirmPass] = useState('');
     const [passMsg, setPassMsg] = useState('');
 
+    // Timesheet states
+    const [timesheets, setTimesheets] = useState([]);
+    const [timesheetForm, setTimesheetForm] = useState({ date: '', hoursWorked: '', taskDescription: '' });
+    const [timesheetMsg, setTimesheetMsg] = useState('');
+
+    // Regularization states
+    const [regularizations, setRegularizations] = useState([]);
+    const [regForm, setRegForm] = useState({ date: '', reason: '', requestedPunchIn: '', requestedPunchOut: '' });
+    const [regMsg, setRegMsg] = useState('');
+
     useEffect(() => {
         loadProfile();
     }, []);
@@ -34,6 +44,22 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
         const res = await fetch('http://localhost:8080/api/employee/leave/' + employeeId);
         const data = await res.json();
         setLeaves(data);
+    };
+
+    const loadTimesheets = async () => {
+        const res = await fetch('http://localhost:8080/api/timesheet/employee/' + employeeId);
+        if (res.ok) {
+            const data = await res.json();
+            setTimesheets(data);
+        }
+    };
+
+    const loadRegularizations = async () => {
+        const res = await fetch('http://localhost:8080/api/regularization/employee/' + employeeId);
+        if (res.ok) {
+            const data = await res.json();
+            setRegularizations(data);
+        }
     };
 
     const punchIn = async () => {
@@ -79,6 +105,53 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
         }
     };
 
+    const submitTimesheet = async () => {
+        if (!timesheetForm.date || !timesheetForm.hoursWorked || !timesheetForm.taskDescription) {
+            setTimesheetMsg('error:All fields required!');
+            return;
+        }
+        const res = await fetch('http://localhost:8080/api/timesheet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                employeeId: employeeId,
+                date: timesheetForm.date,
+                hoursWorked: parseFloat(timesheetForm.hoursWorked),
+                taskDescription: timesheetForm.taskDescription,
+                status: 'SUBMITTED'
+            })
+        });
+        if (res.ok) {
+            setTimesheetMsg('success:Timesheet submitted!');
+            setTimesheetForm({ date: '', hoursWorked: '', taskDescription: '' });
+            loadTimesheets();
+        } else {
+            setTimesheetMsg('error:Error submitting timesheet!');
+        }
+    };
+
+    const submitRegularization = async () => {
+        if (!regForm.date || !regForm.reason) {
+            setRegMsg('error:Date and reason required!');
+            return;
+        }
+        const res = await fetch('http://localhost:8080/api/regularization', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                employeeId: employeeId,
+                ...regForm
+            })
+        });
+        if (res.ok) {
+            setRegMsg('success:Regularization request submitted!');
+            setRegForm({ date: '', reason: '', requestedPunchIn: '', requestedPunchOut: '' });
+            loadRegularizations();
+        } else {
+            setRegMsg('error:Error submitting request!');
+        }
+    };
+
     const changePassword = async () => {
         if (newPass !== confirmPass) { setPassMsg('error:Passwords do not match!'); return; }
         const res = await fetch('http://localhost:8080/api/auth/change-password', {
@@ -90,8 +163,11 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
         else { setPassMsg('error:Wrong current password!'); }
     };
 
-    const pendingCount = leaves.filter(l => l.status === 'PENDING').length;
+    // Work Hours Calculation
+    const totalHours = timesheets.reduce((sum, t) => sum + (t.hoursWorked || 0), 0);
+    const avgHours = timesheets.length > 0 ? (totalHours / timesheets.length).toFixed(1) : 0;
 
+    const pendingCount = leaves.filter(l => l.status === 'PENDING').length;
     const statusColor = (status) =>
         status === 'APPROVED' ? '#10b981' : status === 'REJECTED' ? '#ef4444' : '#f59e0b';
 
@@ -99,6 +175,9 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
         { key: 'profile', label: 'Profile' },
         { key: 'attendance', label: 'Attendance' },
         { key: 'leave', label: 'Leave' },
+        { key: 'timesheet', label: 'Timesheet' },
+        { key: 'workhours', label: 'Work Hours' },
+        { key: 'regularization', label: 'Regularization' },
         { key: 'changepass', label: 'Change Password' }
     ];
 
@@ -126,7 +205,6 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
                     <button className="nav-btn" style={styles.logoutBtn} onClick={onLogout}>Logout</button>
                 </div>
             </div>
-
             <div style={styles.tabBar}>
                 {tabs.map(tab => (
                     <button
@@ -141,6 +219,9 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
                             setActiveTab(tab.key);
                             if (tab.key === 'attendance') loadAttendance();
                             if (tab.key === 'leave') loadLeaves();
+                            if (tab.key === 'timesheet') loadTimesheets();
+                            if (tab.key === 'workhours') loadTimesheets();
+                            if (tab.key === 'regularization') loadRegularizations();
                         }}
                     >
                         {tab.label}
@@ -278,6 +359,153 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
                     </div>
                 )}
 
+                {activeTab === 'timesheet' && (
+                    <div style={styles.card}>
+                        <h2 style={styles.cardTitle}>Timesheet</h2>
+                        <div style={styles.formGrid}>
+                            <input className="modern-input" style={styles.input} type="date"
+                                   value={timesheetForm.date}
+                                   onChange={e => setTimesheetForm({ ...timesheetForm, date: e.target.value })} />
+                            <input className="modern-input" style={styles.input} type="number"
+                                   placeholder="Hours Worked (e.g. 8)"
+                                   value={timesheetForm.hoursWorked}
+                                   onChange={e => setTimesheetForm({ ...timesheetForm, hoursWorked: e.target.value })} />
+                            <input className="modern-input" style={styles.input}
+                                   placeholder="Task Description"
+                                   value={timesheetForm.taskDescription}
+                                   onChange={e => setTimesheetForm({ ...timesheetForm, taskDescription: e.target.value })} />
+                        </div>
+                        <button className="action-btn" style={styles.btnBlue} onClick={submitTimesheet}>Submit Timesheet</button>
+                        {timesheetMsg && (
+                            <p style={{ color: timesheetMsg.startsWith('success') ? '#059669' : '#dc2626', marginTop: '8px', fontWeight: '500', fontSize: '14px' }}>
+                                {timesheetMsg.split(':')[1]}
+                            </p>
+                        )}
+                        <h3 style={{ ...styles.subTitle, marginTop: '20px' }}>My Timesheets</h3>
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={styles.table}>
+                                <thead>
+                                <tr>
+                                    {['Date', 'Hours Worked', 'Task', 'Status'].map(h => (
+                                        <th key={h} style={styles.th}>{h}</th>
+                                    ))}
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {timesheets.length === 0 ? (
+                                    <tr><td colSpan="4" style={{ textAlign: 'center', padding: '30px', color: '#9ca3af' }}>No timesheets submitted</td></tr>
+                                ) : timesheets.map(t => (
+                                    <tr key={t.id}>
+                                        <td style={styles.td}>{t.date}</td>
+                                        <td style={styles.td}>{t.hoursWorked} hrs</td>
+                                        <td style={styles.td}>{t.taskDescription}</td>
+                                        <td style={{ ...styles.td, color: '#6366f1', fontWeight: '600' }}>{t.status}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'workhours' && (
+                    <div style={styles.card}>
+                        <h2 style={styles.cardTitle}>Work Hours Summary</h2>
+                        <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap', marginBottom: '24px' }}>
+                            <div style={{ ...styles.statCard, borderTop: '4px solid #6366f1' }}>
+                                <div style={{ fontSize: '28px', fontWeight: '700', color: '#6366f1' }}>{totalHours.toFixed(1)}</div>
+                                <div style={{ color: '#6b7280', fontSize: '13px', marginTop: '4px' }}>Total Hours Logged</div>
+                            </div>
+                            <div style={{ ...styles.statCard, borderTop: '4px solid #10b981' }}>
+                                <div style={{ fontSize: '28px', fontWeight: '700', color: '#10b981' }}>{timesheets.length}</div>
+                                <div style={{ color: '#6b7280', fontSize: '13px', marginTop: '4px' }}>Days Logged</div>
+                            </div>
+                            <div style={{ ...styles.statCard, borderTop: '4px solid #f59e0b' }}>
+                                <div style={{ fontSize: '28px', fontWeight: '700', color: '#f59e0b' }}>{avgHours}</div>
+                                <div style={{ color: '#6b7280', fontSize: '13px', marginTop: '4px' }}>Avg Hours/Day</div>
+                            </div>
+                        </div>
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={styles.table}>
+                                <thead>
+                                <tr>
+                                    {['Date', 'Hours', 'Task'].map(h => (
+                                        <th key={h} style={styles.th}>{h}</th>
+                                    ))}
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {timesheets.length === 0 ? (
+                                    <tr><td colSpan="3" style={{ textAlign: 'center', padding: '30px', color: '#9ca3af' }}>No data available</td></tr>
+                                ) : timesheets.map(t => (
+                                    <tr key={t.id}>
+                                        <td style={styles.td}>{t.date}</td>
+                                        <td style={{ ...styles.td, fontWeight: '600', color: '#6366f1' }}>{t.hoursWorked} hrs</td>
+                                        <td style={styles.td}>{t.taskDescription}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+                {activeTab === 'regularization' && (
+                    <div style={styles.card}>
+                        <h2 style={styles.cardTitle}>Attendance Regularization</h2>
+                        <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '16px' }}>
+                            Missed punch in/out? Submit a correction request here.
+                        </p>
+                        <div style={styles.formGrid}>
+                            <input className="modern-input" style={styles.input} type="date"
+                                   value={regForm.date}
+                                   onChange={e => setRegForm({ ...regForm, date: e.target.value })} />
+                            <input className="modern-input" style={styles.input} type="time"
+                                   placeholder="Requested Punch In"
+                                   value={regForm.requestedPunchIn}
+                                   onChange={e => setRegForm({ ...regForm, requestedPunchIn: e.target.value })} />
+                            <input className="modern-input" style={styles.input} type="time"
+                                   placeholder="Requested Punch Out"
+                                   value={regForm.requestedPunchOut}
+                                   onChange={e => setRegForm({ ...regForm, requestedPunchOut: e.target.value })} />
+                            <input className="modern-input" style={styles.input}
+                                   placeholder="Reason for regularization"
+                                   value={regForm.reason}
+                                   onChange={e => setRegForm({ ...regForm, reason: e.target.value })} />
+                        </div>
+                        <button className="action-btn" style={styles.btnBlue} onClick={submitRegularization}>Submit Request</button>
+                        {regMsg && (
+                            <p style={{ color: regMsg.startsWith('success') ? '#059669' : '#dc2626', marginTop: '8px', fontWeight: '500', fontSize: '14px' }}>
+                                {regMsg.split(':')[1]}
+                            </p>
+                        )}
+                        <h3 style={{ ...styles.subTitle, marginTop: '20px' }}>My Requests</h3>
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={styles.table}>
+                                <thead>
+                                <tr>
+                                    {['Date', 'Punch In', 'Punch Out', 'Reason', 'Status'].map(h => (
+                                        <th key={h} style={styles.th}>{h}</th>
+                                    ))}
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {regularizations.length === 0 ? (
+                                    <tr><td colSpan="5" style={{ textAlign: 'center', padding: '30px', color: '#9ca3af' }}>No requests submitted</td></tr>
+                                ) : regularizations.map(r => (
+                                    <tr key={r.id}>
+                                        <td style={styles.td}>{r.date}</td>
+                                        <td style={styles.td}>{r.requestedPunchIn || '-'}</td>
+                                        <td style={styles.td}>{r.requestedPunchOut || '-'}</td>
+                                        <td style={styles.td}>{r.reason}</td>
+                                        <td style={{ ...styles.td, color: statusColor(r.status), fontWeight: '600' }}>{r.status}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
                 {activeTab === 'changepass' && (
                     <div style={styles.card}>
                         <h2 style={styles.cardTitle}>Change Password</h2>
@@ -349,6 +577,10 @@ const styles = {
         border: '1.5px solid #e5e7eb', borderRadius: '8px',
         fontSize: '14px', boxSizing: 'border-box', outline: 'none',
         transition: 'all 0.2s'
+    },
+    statCard: {
+        flex: 1, minWidth: '150px', background: 'white', borderRadius: '12px',
+        padding: '18px', textAlign: 'center', boxShadow: '0 1px 6px rgba(0,0,0,0.06)'
     },
     table: { width: '100%', borderCollapse: 'collapse', marginTop: '16px' },
     th: {
