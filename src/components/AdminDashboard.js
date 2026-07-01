@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+
+const GROQ_API_KEY = "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";
 
 function AdminDashboard({ token, onLogout }) {
     const [employees, setEmployees] = useState([]);
@@ -15,13 +17,30 @@ function AdminDashboard({ token, onLogout }) {
     const [pendingLeaves, setPendingLeaves] = useState([]);
     const [insights, setInsights] = useState(null);
 
+    const [holidays, setHolidays] = useState([]);
+    const [newHoliday, setNewHoliday] = useState({ name: '', date: '', description: '' });
+    const [holidayMsg, setHolidayMsg] = useState('');
+
+    const [chatOpen, setChatOpen] = useState(false);
+    const [chatMessages, setChatMessages] = useState([
+        { role: 'assistant', content: 'Hi! I am admin AI assistant. You can ask anything related to employees !' }
+    ]);
+    const [chatInput, setChatInput] = useState('');
+    const [chatLoading, setChatLoading] = useState(false);
+    const chatEndRef = useRef(null);
+
     useEffect(() => {
         loadEmployees();
         loadPendingLeaves();
         loadTodayAttendance();
         loadInsights();
+        loadHolidays();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        if (chatOpen) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [chatMessages, chatOpen]);
 
     const loadEmployees = async () => {
         const res = await fetch('http://localhost:8080/api/admin/employees', {
@@ -60,6 +79,91 @@ function AdminDashboard({ token, onLogout }) {
             const data = await res.json();
             setInsights(data);
         }
+    };
+
+    const loadHolidays = async () => {
+        const res = await fetch('http://localhost:8080/api/holidays', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            setHolidays(data);
+        }
+    };
+
+    const addHoliday = async () => {
+        if (!newHoliday.name || !newHoliday.date) {
+            setHolidayMsg('error:Name and date required!');
+            return;
+        }
+        const res = await fetch('http://localhost:8080/api/holidays', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify(newHoliday)
+        });
+        if (res.ok) {
+            setHolidayMsg('success:Holiday added successfully!');
+            setNewHoliday({ name: '', date: '', description: '' });
+            loadHolidays();
+        } else {
+            setHolidayMsg('error:Error adding holiday!');
+        }
+    };
+
+    const deleteHoliday = async (id) => {
+        if (!window.confirm('Delete this holiday?')) return;
+        await fetch('http://localhost:8080/api/holidays/' + id, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        loadHolidays();
+    };
+
+    const sendChatMessage = async () => {
+        if (!chatInput.trim()) return;
+
+        const userMsg = { role: 'user', content: chatInput };
+        const updatedMessages = [...chatMessages, userMsg];
+        setChatMessages(updatedMessages);
+        setChatInput('');
+        setChatLoading(true);
+
+        const employeeContext = `
+Current employee data:
+- Total employees: ${employees.length}
+- Departments: ${[...new Set(employees.map(e => e.department))].join(', ')}
+- Pending leaves: ${statLeaves}
+- Present today: ${statPresent}
+- Employee list: ${employees.map(e => `${e.name} (${e.department}, ${e.designation})`).join(', ')}
+- Holidays: ${holidays.map(h => `${h.name} on ${h.date}`).join(', ')}
+        `;
+
+        try {
+            const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + GROQ_API_KEY
+                },
+                body: JSON.stringify({
+                    model: 'llama-3.3-70b-versatile',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: `You are a helpful HR admin assistant. Answer questions about employees concisely. ${employeeContext}`
+                        },
+                        ...updatedMessages
+                    ],
+                    max_tokens: 300
+                })
+            });
+            const data = await res.json();
+            const reply = data.choices[0].message.content;
+            setChatMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+        } catch (err) {
+            setChatMessages(prev => [...prev, { role: 'assistant', content: 'Error! Please try again.' }]);
+        }
+        setChatLoading(false);
     };
 
     const addEmployee = async () => {
@@ -115,7 +219,8 @@ function AdminDashboard({ token, onLogout }) {
         dashboard: 'Dashboard',
         employees: 'Employees',
         addEmployee: 'Add Employee',
-        leaves: 'Leave Approval'
+        leaves: 'Leave Approval',
+        holidays: 'Holidays'
     };
 
     return (
@@ -127,6 +232,7 @@ function AdminDashboard({ token, onLogout }) {
                 .modern-input:focus { border-color: #6366f1 !important; box-shadow: 0 0 0 3px rgba(99,102,241,0.15) !important; }
                 .action-btn:hover { opacity: 0.85; transform: translateY(-1px); }
                 table tr:hover td { background: #f9fafb; }
+                .chat-input:focus { outline: none; border-color: #6366f1 !important; }
             `}</style>
 
             <div style={styles.navbar}>
@@ -298,6 +404,107 @@ function AdminDashboard({ token, onLogout }) {
                         </div>
                     </div>
                 )}
+
+                {activeTab === 'holidays' && (
+                    <div style={styles.card}>
+                        <h2 style={styles.cardTitle}>Manage Holidays</h2>
+                        <div style={styles.formGrid}>
+                            <input className="modern-input" style={styles.input} placeholder="Holiday Name"
+                                   value={newHoliday.name}
+                                   onChange={e => setNewHoliday({...newHoliday, name: e.target.value})}
+                            />
+                            <input className="modern-input" style={styles.input} type="date"
+                                   value={newHoliday.date}
+                                   onChange={e => setNewHoliday({...newHoliday, date: e.target.value})}
+                            />
+                            <input className="modern-input" style={styles.input} placeholder="Description"
+                                   value={newHoliday.description}
+                                   onChange={e => setNewHoliday({...newHoliday, description: e.target.value})}
+                            />
+                        </div>
+                        <button className="action-btn" style={styles.btnGreen} onClick={addHoliday}>Add Holiday</button>
+                        {holidayMsg && (
+                            <p style={{
+                                color: holidayMsg.startsWith('success') ? '#059669' : '#dc2626',
+                                marginTop:'12px', fontWeight: '500'
+                            }}>
+                                {holidayMsg.split(':')[1]}
+                            </p>
+                        )}
+
+                        <div style={styles.divider}></div>
+
+                        <div style={{overflowX: 'auto'}}>
+                            <table style={styles.table}>
+                                <thead>
+                                <tr>
+                                    {['ID','Name','Date','Description','Action'].map(h => (
+                                        <th key={h} style={styles.th}>{h}</th>
+                                    ))}
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {holidays.length === 0 ? (
+                                    <tr><td colSpan="5" style={{textAlign:'center', padding:'30px', color:'#9ca3af'}}>No holidays added</td></tr>
+                                ) : holidays.map(h => (
+                                    <tr key={h.id}>
+                                        <td style={styles.td}>{h.id}</td>
+                                        <td style={{...styles.td, fontWeight: '600'}}>{h.name}</td>
+                                        <td style={styles.td}>{h.date}</td>
+                                        <td style={styles.td}>{h.description}</td>
+                                        <td style={styles.td}>
+                                            <button className="action-btn" style={styles.btnRed} onClick={() => deleteHoliday(h.id)}>Delete</button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <div style={styles.chatWidget}>
+                {chatOpen && (
+                    <div style={styles.chatBox}>
+                        <div style={styles.chatHeader}>
+                            <span>🤖 AI Assistant</span>
+                            <button onClick={() => setChatOpen(false)} style={styles.chatClose}>✕</button>
+                        </div>
+                        <div style={styles.chatMessages}>
+                            {chatMessages.map((msg, i) => (
+                                <div key={i} style={{
+                                    ...styles.chatMsg,
+                                    alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                                    background: msg.role === 'user' ? '#6366f1' : '#f3f4f6',
+                                    color: msg.role === 'user' ? 'white' : '#111827'
+                                }}>
+                                    {msg.content}
+                                </div>
+                            ))}
+                            {chatLoading && (
+                                <div style={{...styles.chatMsg, background: '#f3f4f6', color: '#6b7280'}}>
+                                    Typing...
+                                </div>
+                            )}
+                            <div ref={chatEndRef} />
+                        </div>
+                        <div style={styles.chatInputRow}>
+                            <input
+                                className="chat-input"
+                                style={styles.chatInput}
+                                placeholder="Kuch bhi poochho..."
+                                value={chatInput}
+                                onChange={e => setChatInput(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && sendChatMessage()}
+                            />
+                            <button style={styles.chatSend} onClick={sendChatMessage}>➤</button>
+                        </div>
+                    </div>
+                )}
+                <button style={styles.chatFab} onClick={() => setChatOpen(!chatOpen)}>
+                    {chatOpen ? '✕' : '🤖'}
+                </button>
             </div>
         </div>
     );
@@ -326,8 +533,7 @@ const styles = {
     },
     tabBtn: {
         border: 'none', padding: '10px 18px', borderRadius: '20px',
-        cursor: 'pointer', fontSize: '14px', fontWeight: '500',
-        transition: 'all 0.2s'
+        cursor: 'pointer', fontSize: '14px', fontWeight: '500', transition: 'all 0.2s'
     },
     content: { maxWidth: '1150px', margin: '24px auto', padding: '0 20px' },
     card: { background: 'white', borderRadius: '14px', padding: '28px', boxShadow: '0 1px 6px rgba(0,0,0,0.06)' },
@@ -386,6 +592,49 @@ const styles = {
         background: 'white', color: '#4f46e5', border: '1.5px solid #c7d2fe',
         padding: '8px 16px', borderRadius: '7px', cursor: 'pointer',
         fontSize: '13px', fontWeight: '500', transition: 'all 0.2s'
+    },
+    chatWidget: {
+        position: 'fixed', bottom: '24px', right: '24px', zIndex: 1000
+    },
+    chatFab: {
+        width: '56px', height: '56px', borderRadius: '50%',
+        background: '#6366f1', color: 'white', border: 'none',
+        fontSize: '24px', cursor: 'pointer', boxShadow: '0 4px 14px rgba(99,102,241,0.4)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center'
+    },
+    chatBox: {
+        width: '320px', height: '420px', background: 'white',
+        borderRadius: '14px', boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
+        display: 'flex', flexDirection: 'column', marginBottom: '12px',
+        overflow: 'hidden'
+    },
+    chatHeader: {
+        background: '#6366f1', color: 'white', padding: '14px 16px',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        fontWeight: '600'
+    },
+    chatClose: {
+        background: 'transparent', border: 'none', color: 'white',
+        cursor: 'pointer', fontSize: '16px'
+    },
+    chatMessages: {
+        flex: 1, padding: '14px', overflowY: 'auto',
+        display: 'flex', flexDirection: 'column', gap: '8px'
+    },
+    chatMsg: {
+        padding: '8px 12px', borderRadius: '12px', maxWidth: '80%',
+        fontSize: '13px', lineHeight: '1.4'
+    },
+    chatInputRow: {
+        display: 'flex', borderTop: '1px solid #e5e7eb', padding: '10px'
+    },
+    chatInput: {
+        flex: 1, border: '1px solid #e5e7eb', borderRadius: '8px',
+        padding: '8px 12px', fontSize: '13px', marginRight: '8px'
+    },
+    chatSend: {
+        background: '#6366f1', color: 'white', border: 'none',
+        borderRadius: '8px', padding: '8px 14px', cursor: 'pointer'
     },
 };
 export default AdminDashboard;
