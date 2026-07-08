@@ -45,49 +45,49 @@ function AdminDashboard({ token, onLogout }) {
     }, [chatMessages, chatOpen]);
 
     const loadEmployees = async () => {
-        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/admin/employees', { headers: { 'Authorization': 'Bearer ' + token } });
+        const res = await fetch('https://employee-management-production-2291.up.railway.app/api/admin/employees', { headers: { 'Authorization': 'Bearer ' + token } });
         const data = await res.json(); setEmployees(data);
     };
     const loadPendingLeaves = async () => {
-        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/admin/leaves/pending', { headers: { 'Authorization': 'Bearer ' + token } });
+        const res = await fetch('https://employee-management-production-2291.up.railway.app/api/admin/leaves/pending', { headers: { 'Authorization': 'Bearer ' + token } });
         if (res.ok) { const data = await res.json(); setPendingLeaves(data); setStatLeaves(data.length); }
     };
     const loadTodayAttendance = async () => {
-        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/admin/attendance/today', { headers: { 'Authorization': 'Bearer ' + token } });
+        const res = await fetch('https://employee-management-production-2291.up.railway.app/api/admin/attendance/today', { headers: { 'Authorization': 'Bearer ' + token } });
         if (res.ok) { const data = await res.json(); setStatPresent(data.presentCount || 0); }
     };
     const loadInsights = async () => {
-        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/admin/attendance/insights', { headers: { 'Authorization': 'Bearer ' + token } });
+        const res = await fetch('https://employee-management-production-2291.up.railway.app/api/admin/attendance/insights', { headers: { 'Authorization': 'Bearer ' + token } });
         if (res.ok) { const data = await res.json(); setInsights(data); }
     };
     const loadHolidays = async () => {
-        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/holidays', { headers: { 'Authorization': 'Bearer ' + token } });
+        const res = await fetch('https://employee-management-production-2291.up.railway.app/api/holidays', { headers: { 'Authorization': 'Bearer ' + token } });
         if (res.ok) { const data = await res.json(); setHolidays(data); }
     };
     const loadProjects = async () => {
-        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/projects', { headers: { 'Authorization': 'Bearer ' + token } });
+        const res = await fetch('https://employee-management-production-2291.up.railway.app/api/projects', { headers: { 'Authorization': 'Bearer ' + token } });
         if (res.ok) { const data = await res.json(); setProjects(data); }
     };
     const addHoliday = async () => {
         if (!newHoliday.name || !newHoliday.date) { setHolidayMsg('error:Name and date required!'); return; }
-        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/holidays', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(newHoliday) });
+        const res = await fetch('https://employee-management-production-2291.up.railway.app/api/holidays', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(newHoliday) });
         if (res.ok) { setHolidayMsg('success:Holiday added!'); setNewHoliday({ name: '', date: '', description: '' }); loadHolidays(); }
         else { setHolidayMsg('error:Error adding holiday!'); }
     };
     const deleteHoliday = async (id) => {
         if (!window.confirm('Delete this holiday?')) return;
-        await fetch('http://https://employee-management-production-2291.up.railway.app/api/holidays/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+        await fetch('https://employee-management-production-2291.up.railway.app/api/holidays/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
         loadHolidays();
     };
     const addProject = async () => {
         if (!newProject.projectName || !newProject.employeeId) { setProjectMsg('error:Project name and employee required!'); return; }
-        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ ...newProject, employeeId: parseInt(newProject.employeeId) }) });
+        const res = await fetch('https://employee-management-production-2291.up.railway.app/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ ...newProject, employeeId: parseInt(newProject.employeeId) }) });
         if (res.ok) { setProjectMsg('success:Project assigned!'); setNewProject({ projectName: '', description: '', startDate: '', deadline: '', status: 'ONGOING', employeeId: '', assignedBy: 'Admin' }); loadProjects(); }
         else { setProjectMsg('error:Error assigning project!'); }
     };
     const deleteProject = async (id) => {
         if (!window.confirm('Delete this project?')) return;
-        await fetch('http://https://employee-management-production-2291.up.railway.app/api/projects/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+        await fetch('https://employee-management-production-2291.up.railway.app/api/projects/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
         loadProjects();
     };
     const sendChatMessage = async () => {
@@ -104,10 +104,10 @@ function AdminDashboard({ token, onLogout }) {
         setChatLoading(false);
     };
     const addEmployee = async () => {
-        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/admin/employees', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ ...newEmp, salary: parseFloat(newEmp.salary) }) });
+        const res = await fetch('https://employee-management-production-2291.up.railway.app/api/admin/employees', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ ...newEmp, salary: parseFloat(newEmp.salary) }) });
         if (res.ok) {
             const saved = await res.json();
-            if (newUsername && newPassword) await fetch('http://https://employee-management-production-2291.up.railway.app/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: newUsername, password: newPassword, employeeId: String(saved.id) }) });
+            if (newUsername && newPassword) await fetch('https://employee-management-production-2291.up.railway.app/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: newUsername, password: newPassword, employeeId: String(saved.id) }) });
             setAddMsg('success:Employee added successfully!');
             setNewEmp({ name:'', department:'', designation:'', email:'', mobileNumber:'', salary:'', joiningDate:'' });
             setNewUsername(''); setNewPassword(''); loadEmployees();
@@ -115,11 +115,11 @@ function AdminDashboard({ token, onLogout }) {
     };
     const deleteEmployee = async (id) => {
         if (!window.confirm('Delete this employee?')) return;
-        await fetch('http://https://employee-management-production-2291.up.railway.app/api/admin/employees/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+        await fetch('https://employee-management-production-2291.up.railway.app/api/admin/employees/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
         loadEmployees();
     };
-    const approveLeave = async (id) => { await fetch('http://https://employee-management-production-2291.up.railway.app/api/admin/leave/' + id + '/approve', { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } }); loadPendingLeaves(); };
-    const rejectLeave = async (id) => { await fetch('http://https://employee-management-production-2291.up.railway.app/api/admin/leave/' + id + '/reject', { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } }); loadPendingLeaves(); };
+    const approveLeave = async (id) => { await fetch('https://employee-management-production-2291.up.railway.app/api/admin/leave/' + id + '/approve', { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } }); loadPendingLeaves(); };
+    const rejectLeave = async (id) => { await fetch('https://employee-management-production-2291.up.railway.app/api/admin/leave/' + id + '/reject', { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token } }); loadPendingLeaves(); };
 
     const tabList = [
         { key: 'dashboard', label: '📊 Dashboard' },

@@ -15,7 +15,7 @@ function HRDashboard({ token, onLogout }) {
     }, []);
 
     const loadEmployees = async () => {
-        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/hr/employees', {
+        const res = await fetch('https://employee-management-production-2291.up.railway.app/api/hr/employees', {
             headers: { 'Authorization': 'Bearer ' + token }
         });
         if (res.ok) {
@@ -38,7 +38,7 @@ function HRDashboard({ token, onLogout }) {
     };
 
     const updateEmployee = async () => {
-        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/hr/employees/' + selectedEmp.id, {
+        const res = await fetch('https://employee-management-production-2291.up.railway.app/api/hr/employees/' + selectedEmp.id, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
             body: JSON.stringify({ ...editForm, salary: parseFloat(editForm.salary) })
