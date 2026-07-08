@@ -20,7 +20,7 @@ function Login({ onLogin }) {
         setError('');
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:8080/api/auth/login', {
+            const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -36,7 +36,7 @@ function Login({ onLogin }) {
         if (!forgotEmail) { setForgotMsg('error:Please enter your email!'); return; }
         setForgotLoading(true);
         try {
-            const res = await fetch('http://localhost:8080/api/password/forgot-password', {
+            const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/password/forgot-password', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: forgotEmail })
             });
@@ -51,7 +51,7 @@ function Login({ onLogin }) {
         if (!otp) { setForgotMsg('error:Please enter OTP!'); return; }
         setForgotLoading(true);
         try {
-            const res = await fetch('http://localhost:8080/api/password/verify-otp', {
+            const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/password/verify-otp', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: forgotEmail, otp })
             });
@@ -66,7 +66,7 @@ function Login({ onLogin }) {
         if (newPassword !== confirmPassword) { setForgotMsg('error:Passwords do not match!'); return; }
         setForgotLoading(true);
         try {
-            const res = await fetch('http://localhost:8080/api/password/reset-password', {
+            const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/password/reset-password', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: forgotEmail, otp, newPassword })
             });

@@ -24,40 +24,40 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
     useEffect(() => { loadProfile(); }, []);
 
     const loadProfile = async () => {
-        const res = await fetch('http://localhost:8080/api/employee/profile/' + employeeId);
+        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/employee/profile/' + employeeId);
         const data = await res.json();
         setProfile(data);
     };
 
     const loadAttendance = async () => {
-        const res = await fetch('http://localhost:8080/api/employee/attendance/' + employeeId);
+        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/employee/attendance/' + employeeId);
         const data = await res.json();
         setAttendance(data);
     };
 
     const loadLeaves = async () => {
-        const res = await fetch('http://localhost:8080/api/employee/leave/' + employeeId);
+        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/employee/leave/' + employeeId);
         const data = await res.json();
         setLeaves(data);
     };
 
     const loadTimesheets = async () => {
-        const res = await fetch('http://localhost:8080/api/timesheet/employee/' + employeeId);
+        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/timesheet/employee/' + employeeId);
         if (res.ok) { const data = await res.json(); setTimesheets(data); }
     };
 
     const loadRegularizations = async () => {
-        const res = await fetch('http://localhost:8080/api/regularization/employee/' + employeeId);
+        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/regularization/employee/' + employeeId);
         if (res.ok) { const data = await res.json(); setRegularizations(data); }
     };
 
     const loadProjects = async () => {
-        const res = await fetch('http://localhost:8080/api/projects/employee/' + employeeId);
+        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/projects/employee/' + employeeId);
         if (res.ok) { const data = await res.json(); setProjects(data); }
     };
 
     const punchIn = async () => {
-        const res = await fetch('http://localhost:8080/api/employee/attendance/punchin', {
+        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/employee/attendance/punchin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ employeeId: String(employeeId) })
@@ -67,7 +67,7 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
     };
 
     const punchOut = async () => {
-        const res = await fetch('http://localhost:8080/api/employee/attendance/punchout', {
+        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/employee/attendance/punchout', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ employeeId: String(employeeId) })
@@ -77,7 +77,7 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
     };
 
     const applyLeave = async () => {
-        const res = await fetch('http://localhost:8080/api/employee/leave', {
+        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/employee/leave', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ employeeId: String(employeeId), ...leaveForm })
@@ -87,7 +87,7 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
 
     const submitTimesheet = async () => {
         if (!timesheetForm.date || !timesheetForm.hoursWorked || !timesheetForm.taskDescription) { setTimesheetMsg('error:All fields required!'); return; }
-        const res = await fetch('http://localhost:8080/api/timesheet', {
+        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/timesheet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ employeeId, date: timesheetForm.date, hoursWorked: parseFloat(timesheetForm.hoursWorked), taskDescription: timesheetForm.taskDescription, status: 'SUBMITTED' })
@@ -98,7 +98,7 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
 
     const submitRegularization = async () => {
         if (!regForm.date || !regForm.reason) { setRegMsg('error:Date and reason required!'); return; }
-        const res = await fetch('http://localhost:8080/api/regularization', {
+        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/regularization', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ employeeId, ...regForm })
@@ -109,7 +109,7 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
 
     const changePassword = async () => {
         if (newPass !== confirmPass) { setPassMsg('error:Passwords do not match!'); return; }
-        const res = await fetch('http://localhost:8080/api/auth/change-password', {
+        const res = await fetch('http://https://employee-management-production-2291.up.railway.app/api/auth/change-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
             body: JSON.stringify({ username: profile?.name, oldPassword: oldPass, newPassword: newPass })
