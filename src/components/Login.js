@@ -84,54 +84,57 @@ function Login({ onLogin }) {
         <>
             <style>{`
                 @keyframes fadeInUp {
-                    from { opacity: 0; transform: translateY(30px); }
+                    from { opacity: 0; transform: translateY(24px); }
                     to { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes float {
-                    0%, 100% { transform: translateY(0px); }
-                    50% { transform: translateY(-10px); }
                 }
                 @keyframes pulse {
                     0%, 100% { opacity: 1; }
                     50% { opacity: 0.7; }
                 }
-                .login-input:focus { border-color: #6366f1 !important; box-shadow: 0 0 0 4px rgba(99,102,241,0.1) !important; outline: none; }
-                .login-btn:hover { background: linear-gradient(135deg, #4f46e5, #6366f1) !important; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.4) !important; }
-                .login-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none !important; }
-                .forgot-link:hover { color: #4f46e5 !important; text-decoration: underline; }
-                .back-btn:hover { background: #f3f4f6 !important; }
-                .show-pass:hover { color: #6366f1 !important; }
-                .bubble { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.1); animation: float 3s ease-in-out infinite; }
+                .login-input:focus { border-color: #4338ca !important; box-shadow: 0 0 0 4px rgba(67,56,202,0.12) !important; outline: none; background: white !important; }
+                .login-btn:hover { background: linear-gradient(135deg, #312e81, #4338ca) !important; transform: translateY(-1px); box-shadow: 0 10px 28px rgba(67,56,202,0.35) !important; }
+                .login-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none !important; }
+                .forgot-link:hover { color: #4338ca !important; text-decoration: underline; }
+                .back-btn:hover { background: #f8fafc !important; border-color: #cbd5e1 !important; }
+                .show-pass:hover { color: #4338ca !important; }
             `}</style>
 
             <div style={styles.container}>
-                {/* Background bubbles */}
-                <div className="bubble" style={{ width: '80px', height: '80px', top: '10%', left: '10%', animationDelay: '0s' }}></div>
-                <div className="bubble" style={{ width: '120px', height: '120px', top: '60%', right: '8%', animationDelay: '1s' }}></div>
-                <div className="bubble" style={{ width: '60px', height: '60px', bottom: '15%', left: '15%', animationDelay: '2s' }}></div>
-                <div className="bubble" style={{ width: '100px', height: '100px', top: '25%', right: '20%', animationDelay: '0.5s' }}></div>
+                <div style={styles.gridOverlay}></div>
+                <div style={styles.glow1}></div>
+                <div style={styles.glow2}></div>
 
                 <div style={styles.card}>
-                    {/* Left Panel */}
                     <div style={styles.leftPanel}>
-                        <div style={styles.logoWrap}>
-                            <span style={{ fontSize: '40px' }}>🏢</span>
-                        </div>
-                        <h1 style={styles.brandTitle}>EMS</h1>
-                        <p style={styles.brandSubtitle}>Employee Management System</p>
-                        <div style={styles.features}>
-                            {['👥 Manage Employees', '📊 Track Attendance', '📅 Leave Management', '🤖 AI Assistant'].map((f, i) => (
-                                <div key={i} style={styles.featureItem}>{f}</div>
-                            ))}
+                        <div style={styles.leftPanelInner}>
+                            <div style={styles.logoWrap}>
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2L2 20H22L12 2Z" fill="white" />
+                                </svg>
+                            </div>
+                            <h1 style={styles.brandTitle}>VERTEX</h1>
+                            <p style={styles.brandSubtitle}>Workforce Management Platform</p>
+                            <div style={styles.features}>
+                                {[
+                                    ['👥', 'Manage Employees'],
+                                    ['📊', 'Track Attendance'],
+                                    ['📅', 'Leave Management'],
+                                    ['🤖', 'AI Assistant']
+                                ].map(([icon, label], i) => (
+                                    <div key={i} style={styles.featureItem}>
+                                        <span style={styles.featureIcon}>{icon}</span>
+                                        <span>{label}</span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Right Panel */}
                     <div style={styles.rightPanel}>
                         {!showForgot ? (
                             <>
-                                <h2 style={styles.welcomeTitle}>Welcome Back!</h2>
-                                <p style={styles.welcomeSubtitle}>Sign in to your account</p>
+                                <h2 style={styles.welcomeTitle}>Welcome back</h2>
+                                <p style={styles.welcomeSubtitle}>Sign in to continue to Vertex</p>
 
                                 <div style={styles.inputGroup}>
                                     <label style={styles.label}>Username</label>
@@ -157,7 +160,7 @@ function Login({ onLogin }) {
                                     </div>
                                 </div>
 
-                                <div style={{ textAlign: 'right', marginBottom: '20px' }}>
+                                <div style={{ textAlign: 'right', marginBottom: '22px' }}>
                                     <span className="forgot-link" style={styles.forgotLink}
                                           onClick={() => { setShowForgot(true); setError(''); }}>
                                         Forgot Password?
@@ -165,7 +168,7 @@ function Login({ onLogin }) {
                                 </div>
 
                                 <button className="login-btn" style={styles.button} onClick={handleLogin} disabled={loading}>
-                                    {loading ? <span style={{ animation: 'pulse 1s infinite' }}>Signing in...</span> : '→ Sign In'}
+                                    {loading ? <span style={{ animation: 'pulse 1s infinite' }}>Signing in...</span> : 'Sign In'}
                                 </button>
 
                                 {error && (
@@ -177,19 +180,18 @@ function Login({ onLogin }) {
                         ) : (
                             <>
                                 <h2 style={styles.welcomeTitle}>
-                                    {!showOtp ? '🔐 Forgot Password' : !showReset ? '📧 Verify OTP' : '🔑 New Password'}
+                                    {!showOtp ? 'Reset password' : !showReset ? 'Verify OTP' : 'New password'}
                                 </h2>
                                 <p style={styles.welcomeSubtitle}>
-                                    {!showOtp ? 'Enter your registered email' : !showReset ? 'Check your email for OTP' : 'Create a strong new password'}
+                                    {!showOtp ? 'Enter your registered email' : !showReset ? 'Check your email for the code' : 'Create a strong new password'}
                                 </p>
 
-                                {/* Step indicator */}
                                 <div style={styles.stepIndicator}>
                                     {['Email', 'OTP', 'Reset'].map((step, i) => (
                                         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                            <div style={{ ...styles.stepDot, background: i === 0 ? '#6366f1' : (showOtp && i === 1) || (showReset && i <= 2) ? '#6366f1' : '#e5e7eb', color: i === 0 || (showOtp && i === 1) || (showReset && i <= 2) ? 'white' : '#9ca3af' }}>{i + 1}</div>
-                                            <span style={{ fontSize: '12px', color: '#6b7280' }}>{step}</span>
-                                            {i < 2 && <div style={{ width: '20px', height: '2px', background: (showOtp && i === 0) || (showReset && i <= 1) ? '#6366f1' : '#e5e7eb', marginLeft: '4px' }}></div>}
+                                            <div style={{ ...styles.stepDot, background: i === 0 ? '#4338ca' : (showOtp && i === 1) || (showReset && i <= 2) ? '#4338ca' : '#e2e8f0', color: i === 0 || (showOtp && i === 1) || (showReset && i <= 2) ? 'white' : '#94a3b8' }}>{i + 1}</div>
+                                            <span style={{ fontSize: '12px', color: '#64748b' }}>{step}</span>
+                                            {i < 2 && <div style={{ width: '20px', height: '2px', background: (showOtp && i === 0) || (showReset && i <= 1) ? '#4338ca' : '#e2e8f0', marginLeft: '4px' }}></div>}
                                         </div>
                                     ))}
                                 </div>
@@ -244,7 +246,7 @@ function Login({ onLogin }) {
                                 <button className="login-btn" style={styles.button}
                                         onClick={!showOtp ? sendOtp : !showReset ? verifyOtp : resetPassword}
                                         disabled={forgotLoading}>
-                                    {forgotLoading ? 'Please wait...' : !showOtp ? '→ Send OTP' : !showReset ? '→ Verify OTP' : '→ Reset Password'}
+                                    {forgotLoading ? 'Please wait...' : !showOtp ? 'Send OTP' : !showReset ? 'Verify OTP' : 'Reset Password'}
                                 </button>
 
                                 {forgotMsg && (
@@ -261,6 +263,8 @@ function Login({ onLogin }) {
                         )}
                     </div>
                 </div>
+
+                <p style={styles.footer}>© 2026 Vertex. All rights reserved.</p>
             </div>
         </>
     );
@@ -268,56 +272,65 @@ function Login({ onLogin }) {
 
 const styles = {
     container: {
-        display: 'flex', justifyContent: 'center', alignItems: 'center',
-        minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-        fontFamily: "'Segoe UI', sans-serif", position: 'relative', overflow: 'hidden'
+        display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+        minHeight: '100vh', background: '#0f0e2e',
+        backgroundImage: 'radial-gradient(circle at 20% 20%, #1e1b4b 0%, #0f0e2e 55%)',
+        fontFamily: "'Segoe UI', sans-serif", position: 'relative', overflow: 'hidden', padding: '20px'
     },
+    gridOverlay: {
+        position: 'absolute', inset: 0,
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px)',
+        backgroundSize: '42px 42px', pointerEvents: 'none'
+    },
+    glow1: { position: 'absolute', width: '420px', height: '420px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.35), transparent 70%)', top: '-120px', left: '-100px', filter: 'blur(10px)' },
+    glow2: { position: 'absolute', width: '380px', height: '380px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.28), transparent 70%)', bottom: '-140px', right: '-100px', filter: 'blur(10px)' },
     card: {
-        display: 'flex', width: '820px', minHeight: '520px',
-        borderRadius: '24px', overflow: 'hidden',
-        boxShadow: '0 30px 80px rgba(0,0,0,0.3)',
-        animation: 'fadeInUp 0.6s ease-out'
+        display: 'flex', width: '860px', maxWidth: '95vw', minHeight: '520px',
+        borderRadius: '20px', overflow: 'hidden',
+        boxShadow: '0 40px 90px rgba(0,0,0,0.45)',
+        animation: 'fadeInUp 0.5s ease-out', position: 'relative', zIndex: 1
     },
     leftPanel: {
-        width: '45%', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
-        padding: '50px 35px', display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', color: 'white'
+        width: '42%', background: 'linear-gradient(160deg, #1e1b4b 0%, #312e81 55%, #4338ca 100%)',
+        padding: '48px 34px', display: 'flex', alignItems: 'center', color: 'white'
     },
+    leftPanelInner: { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%' },
     logoWrap: {
-        width: '80px', height: '80px', background: 'rgba(255,255,255,0.2)',
-        borderRadius: '20px', display: 'flex', alignItems: 'center',
-        justifyContent: 'center', marginBottom: '20px',
-        boxShadow: '0 8px 20px rgba(0,0,0,0.2)'
+        width: '50px', height: '50px', background: 'rgba(255,255,255,0.14)',
+        borderRadius: '14px', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', marginBottom: '22px', border: '1px solid rgba(255,255,255,0.18)'
     },
-    brandTitle: { fontSize: '36px', fontWeight: '800', margin: '0 0 8px', letterSpacing: '3px' },
-    brandSubtitle: { fontSize: '13px', opacity: 0.8, textAlign: 'center', marginBottom: '30px', lineHeight: '1.5' },
-    features: { display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' },
-    featureItem: { background: 'rgba(255,255,255,0.1)', padding: '10px 16px', borderRadius: '10px', fontSize: '13px', backdropFilter: 'blur(10px)' },
-    rightPanel: { width: '55%', background: 'white', padding: '50px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' },
-    welcomeTitle: { fontSize: '24px', fontWeight: '700', color: '#111827', margin: '0 0 8px' },
-    welcomeSubtitle: { fontSize: '14px', color: '#6b7280', marginBottom: '28px' },
+    brandTitle: { fontSize: '30px', fontWeight: '800', margin: '0 0 6px', letterSpacing: '4px' },
+    brandSubtitle: { fontSize: '13px', opacity: 0.75, marginBottom: '34px', lineHeight: '1.5' },
+    features: { display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' },
+    featureItem: { display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', padding: '11px 14px', borderRadius: '10px', fontSize: '13px' },
+    featureIcon: { fontSize: '15px' },
+    rightPanel: { width: '58%', background: 'white', padding: '52px 46px', display: 'flex', flexDirection: 'column', justifyContent: 'center' },
+    welcomeTitle: { fontSize: '25px', fontWeight: '700', color: '#0f172a', margin: '0 0 6px', letterSpacing: '-0.3px' },
+    welcomeSubtitle: { fontSize: '14px', color: '#64748b', marginBottom: '30px' },
     inputGroup: { marginBottom: '16px' },
-    label: { fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', display: 'block' },
+    label: { fontSize: '13px', fontWeight: '600', color: '#334155', marginBottom: '6px', display: 'block' },
     inputWrap: { position: 'relative', display: 'flex', alignItems: 'center' },
-    inputIcon: { position: 'absolute', left: '12px', fontSize: '16px', zIndex: 1 },
+    inputIcon: { position: 'absolute', left: '13px', fontSize: '15px', zIndex: 1, opacity: 0.7 },
     input: {
-        width: '100%', padding: '12px 14px 12px 38px',
-        border: '1.5px solid #e5e7eb', borderRadius: '10px',
+        width: '100%', padding: '12px 14px 12px 40px',
+        border: '1.5px solid #e2e8f0', borderRadius: '10px',
         fontSize: '14px', boxSizing: 'border-box', outline: 'none',
-        transition: 'all 0.2s', background: '#fafafa'
+        transition: 'all 0.2s', background: '#f8fafc', color: '#0f172a'
     },
-    showPass: { position: 'absolute', right: '12px', cursor: 'pointer', fontSize: '16px', color: '#9ca3af', transition: 'all 0.2s' },
-    forgotLink: { color: '#6366f1', fontSize: '13px', cursor: 'pointer', fontWeight: '500' },
+    showPass: { position: 'absolute', right: '13px', cursor: 'pointer', fontSize: '15px', color: '#94a3b8', transition: 'all 0.2s' },
+    forgotLink: { color: '#4338ca', fontSize: '13px', cursor: 'pointer', fontWeight: '600' },
     button: {
-        width: '100%', padding: '14px', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-        color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px',
-        fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s',
-        boxShadow: '0 4px 15px rgba(99,102,241,0.3)', marginBottom: '8px'
+        width: '100%', padding: '13px', background: 'linear-gradient(135deg, #4338ca, #6366f1)',
+        color: 'white', border: 'none', borderRadius: '10px', fontSize: '14.5px',
+        fontWeight: '600', cursor: 'pointer', transition: 'all 0.25s',
+        boxShadow: '0 6px 18px rgba(67,56,202,0.28)', marginBottom: '8px', letterSpacing: '0.2px'
     },
-    stepIndicator: { display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '20px' },
-    stepDot: { width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700' },
-    backBtn: { background: 'none', border: '1px solid #e5e7eb', color: '#6b7280', cursor: 'pointer', marginTop: '12px', fontSize: '13px', fontWeight: '500', padding: '8px 16px', borderRadius: '8px', width: '100%', transition: 'all 0.2s' },
-    errorBox: { marginTop: '12px', padding: '10px 14px', background: '#fef2f2', color: '#dc2626', borderRadius: '8px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }
+    stepIndicator: { display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '22px' },
+    stepDot: { width: '23px', height: '23px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700' },
+    backBtn: { background: 'none', border: '1.5px solid #e2e8f0', color: '#64748b', cursor: 'pointer', marginTop: '12px', fontSize: '13px', fontWeight: '600', padding: '9px 16px', borderRadius: '9px', width: '100%', transition: 'all 0.2s' },
+    errorBox: { marginTop: '12px', padding: '10px 14px', background: '#fef2f2', color: '#dc2626', borderRadius: '9px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' },
+    footer: { position: 'relative', zIndex: 1, marginTop: '22px', color: 'rgba(255,255,255,0.4)', fontSize: '12px', letterSpacing: '0.3px' }
 };
 
 export default Login;

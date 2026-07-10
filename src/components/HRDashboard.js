@@ -64,7 +64,7 @@ function HRDashboard({ token, onLogout }) {
             `}</style>
 
             <div style={styles.navbar}>
-                <span>Employee Management System</span>
+                <span>Vertex</span>
                 <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                     <div style={styles.hrBadge}>
                         <ProfilePhoto employeeId="hr" currentPhoto={null} token={token} size={26} />

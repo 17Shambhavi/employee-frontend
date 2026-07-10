@@ -146,7 +146,7 @@ function AdminDashboard({ token, onLogout }) {
                 <div style={styles.navLeft}>
                     <div style={styles.navLogo}>🏢</div>
                     <div>
-                        <div style={styles.navTitle}>Employee Management System</div>
+                        <div style={styles.navTitle}>Vertexg</div>
                         <div style={styles.navSub}>Admin Portal</div>
                     </div>
                 </div>

@@ -147,7 +147,7 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
             `}</style>
 
             <div style={styles.navbar}>
-                <span style={styles.brand}>Employee Management System</span>
+                <span style={styles.brand}>Vertex</span>
                 <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
                     <div style={styles.userBadge}>
                         <ProfilePhoto employeeId={employeeId} currentPhoto={profile?.profilePhoto} token={token} size={32} onUpdated={(p) => setProfile({ ...profile, profilePhoto: p })} />
