@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ProfilePhoto from './ProfilePhoto';
 const GROQ_API_KEY = process.env.REACT_APP_GROQ_API_KEY;
 
 function AdminDashboard({ token, onLogout }) {
@@ -31,7 +32,6 @@ function AdminDashboard({ token, onLogout }) {
     }, []);
 
     useEffect(() => {
-        // Auto generate notifications
         const notifs = [];
         if (statLeaves > 0) notifs.push({ id: 1, type: 'warning', msg: `${statLeaves} leave request(s) pending approval`, time: 'Just now' });
         if (employees.length > 0) notifs.push({ id: 2, type: 'info', msg: `${employees.length} total employees in system`, time: '5 min ago' });
@@ -130,8 +130,6 @@ function AdminDashboard({ token, onLogout }) {
         { key: 'projects', label: '🚀 Projects' },
     ];
 
-    const notifColor = (type) => type === 'warning' ? '#f59e0b' : type === 'success' ? '#10b981' : '#6366f1';
-
     return (
         <div style={styles.container}>
             <style>{`
@@ -144,7 +142,6 @@ function AdminDashboard({ token, onLogout }) {
                 .notif-item:hover { background: #f3f4f6 !important; }
             `}</style>
 
-            {/* Navbar */}
             <div style={styles.navbar}>
                 <div style={styles.navLeft}>
                     <div style={styles.navLogo}>🏢</div>
@@ -154,7 +151,6 @@ function AdminDashboard({ token, onLogout }) {
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    {/* Notification Bell */}
                     <div style={{ position: 'relative' }}>
                         <button className="nav-btn" style={styles.bellBtn} onClick={() => setShowNotif(!showNotif)}>
                             🔔
@@ -179,14 +175,13 @@ function AdminDashboard({ token, onLogout }) {
                         )}
                     </div>
                     <div style={styles.adminBadge}>
-                        <span style={styles.adminAvatar}>A</span>
+                        <ProfilePhoto employeeId="admin" currentPhoto={null} token={token} size={26} />
                         <span style={{ fontSize: '13px' }}>Admin</span>
                     </div>
                     <button className="nav-btn" style={styles.logoutBtn} onClick={onLogout}>← Logout</button>
                 </div>
             </div>
 
-            {/* Tab Bar */}
             <div style={styles.tabBar}>
                 {tabList.map(tab => (
                     <button key={tab.key} className="tab-btn"
@@ -230,7 +225,6 @@ function AdminDashboard({ token, onLogout }) {
                             </div>
                         )}
 
-                        {/* Quick Actions */}
                         <div style={styles.quickActions}>
                             <h3 style={{ margin: '0 0 16px', color: '#374151', fontSize: '16px' }}>⚡ Quick Actions</h3>
                             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
@@ -246,6 +240,33 @@ function AdminDashboard({ token, onLogout }) {
                                     </button>
                                 ))}
                             </div>
+                        </div>
+
+                        <div style={styles.quickActions}>
+                            <h3 style={{ margin: '0 0 16px', color: '#374151', fontSize: '16px' }}>📊 Employees by Department</h3>
+                            {employees.length === 0 ? (
+                                <p style={{ color: '#9ca3af', fontSize: '13px' }}>No employee data yet</p>
+                            ) : (
+                                Object.entries(
+                                    employees.reduce((acc, e) => { acc[e.department] = (acc[e.department] || 0) + 1; return acc; }, {})
+                                ).map(([dept, count], i) => (
+                                    <div key={dept} style={{ marginBottom: '12px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#374151', marginBottom: '4px' }}>
+                                            <span>{dept}</span>
+                                            <span style={{ fontWeight: '700' }}>{count}</span>
+                                        </div>
+                                        <div style={{ background: '#f3f4f6', borderRadius: '8px', height: '10px', overflow: 'hidden' }}>
+                                            <div style={{
+                                                width: `${(count / employees.length) * 100}%`,
+                                                background: ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#06b6d4'][i % 5],
+                                                height: '100%',
+                                                borderRadius: '8px',
+                                                transition: 'width 0.5s ease'
+                                            }}></div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </div>
                 )}
@@ -388,7 +409,6 @@ function AdminDashboard({ token, onLogout }) {
                 )}
             </div>
 
-            {/* AI Chatbot */}
             <div style={styles.chatWidget}>
                 {chatOpen && (
                     <div style={styles.chatBox}>
@@ -436,7 +456,6 @@ const styles = {
     navTitle: { fontSize: '16px', fontWeight: '700', letterSpacing: '0.3px' },
     navSub: { fontSize: '11px', opacity: 0.7, marginTop: '2px' },
     adminBadge: { display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.15)', padding: '6px 14px 6px 6px', borderRadius: '20px', fontSize: '13px', fontWeight: '500' },
-    adminAvatar: { width: '26px', height: '26px', background: 'linear-gradient(135deg, #f59e0b, #ec4899)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700', color: 'white' },
     logoutBtn: { background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s' },
     bellBtn: { background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', width: '38px', height: '38px', borderRadius: '10px', cursor: 'pointer', fontSize: '16px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' },
     notifBadge: { position: 'absolute', top: '-6px', right: '-6px', background: '#ef4444', color: 'white', borderRadius: '50%', width: '18px', height: '18px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700' },
@@ -459,7 +478,7 @@ const styles = {
     insightTag: { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', fontSize: '11px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px' },
     insightRate: { color: '#4f46e5', fontWeight: '700', fontSize: '14px', marginLeft: '10px' },
     insightText: { color: '#374151', fontSize: '14px', lineHeight: '1.6', margin: 0 },
-    quickActions: { background: 'white', borderRadius: '14px', padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
+    quickActions: { background: 'white', borderRadius: '14px', padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', marginTop: '20px' },
     formGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '8px' },
     input: { width: '100%', padding: '11px 14px', border: '1.5px solid #e5e7eb', borderRadius: '10px', fontSize: '14px', boxSizing: 'border-box', outline: 'none', transition: 'all 0.2s', background: '#fafafa' },
     divider: { borderTop: '1px solid #f3f4f6', margin: '20px 0' },
@@ -469,11 +488,8 @@ const styles = {
     th: { background: '#f8f9ff', color: '#6b7280', padding: '12px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px', borderBottom: '2px solid #e5e7eb' },
     td: { padding: '12px 16px', borderBottom: '1px solid #f3f4f6', fontSize: '14px', color: '#374151' },
     idBadge: { background: '#f3f4f6', color: '#6b7280', padding: '2px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: '600' },
-    deptBadge: { background: '#eef2ff', color: '#6366f1', padding: '3px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '600' },
     dateBadge: { background: '#f0fdf4', color: '#10b981', padding: '3px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '600' },
     statusBadge: { padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' },
-    empName: { display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600' },
-    empAvatar: { width: '28px', height: '28px', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '12px', fontWeight: '700', flexShrink: 0 },
     btnPrimary: { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', padding: '11px 24px', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(99,102,241,0.3)', marginTop: '8px' },
     btnGreen: { background: '#10b981', color: 'white', border: 'none', padding: '8px 14px', borderRadius: '8px', cursor: 'pointer', margin: '3px', fontSize: '12px', fontWeight: '600', transition: 'all 0.2s' },
     btnRed: { background: '#ef4444', color: 'white', border: 'none', padding: '8px 14px', borderRadius: '8px', cursor: 'pointer', margin: '3px', fontSize: '12px', fontWeight: '600', transition: 'all 0.2s' },
@@ -491,4 +507,4 @@ const styles = {
     chatSend: { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', borderRadius: '10px', padding: '9px 16px', cursor: 'pointer', fontSize: '14px' },
 };
 
-export default AdminDashboard
+export default AdminDashboard;

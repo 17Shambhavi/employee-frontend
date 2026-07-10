@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ProfilePhoto from './ProfilePhoto';
 
 function HRDashboard({ token, onLogout }) {
     const [employees, setEmployees] = useState([]);
@@ -65,7 +66,10 @@ function HRDashboard({ token, onLogout }) {
             <div style={styles.navbar}>
                 <span>Employee Management System</span>
                 <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                    <span style={styles.hrBadge}>HR</span>
+                    <div style={styles.hrBadge}>
+                        <ProfilePhoto employeeId="hr" currentPhoto={null} token={token} size={26} />
+                        <span>HR</span>
+                    </div>
                     <button className="nav-btn" style={styles.logoutBtn} onClick={onLogout}>Logout</button>
                 </div>
             </div>
@@ -102,7 +106,7 @@ function HRDashboard({ token, onLogout }) {
                             <table style={styles.table}>
                                 <thead>
                                 <tr>
-                                    {['ID', 'Name', 'Department', 'Designation', 'Email', 'Mobile', 'Salary'].map(h => (
+                                    {['Photo', 'ID', 'Name', 'Department', 'Designation', 'Email', 'Mobile', 'Salary'].map(h => (
                                         <th key={h} style={styles.th}>{h}</th>
                                     ))}
                                 </tr>
@@ -114,6 +118,7 @@ function HRDashboard({ token, onLogout }) {
                                         className="row-clickable"
                                         onClick={() => { selectEmployee(emp); setActiveTab('edit'); }}
                                     >
+                                        <td style={styles.td}><ProfilePhoto employeeId={emp.id} currentPhoto={emp.profilePhoto} token={token} size={32} /></td>
                                         <td style={styles.td}>{emp.id}</td>
                                         <td style={{ ...styles.td, fontWeight: '600' }}>{emp.name}</td>
                                         <td style={styles.td}>{emp.department}</td>
@@ -138,6 +143,9 @@ function HRDashboard({ token, onLogout }) {
                             </p>
                         ) : (
                             <>
+                                <div style={{ marginBottom: '20px' }}>
+                                    <ProfilePhoto employeeId={selectedEmp.id} currentPhoto={selectedEmp.profilePhoto} token={token} size={80} />
+                                </div>
                                 <div style={styles.formGrid}>
                                     <input className="modern-input" style={styles.input}
                                            placeholder="Name" value={editForm.name}
@@ -187,7 +195,8 @@ const styles = {
         boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
     },
     hrBadge: {
-        background: 'rgba(255,255,255,0.15)', padding: '6px 14px',
+        display: 'flex', alignItems: 'center', gap: '8px',
+        background: 'rgba(255,255,255,0.15)', padding: '6px 14px 6px 6px',
         borderRadius: '20px', fontSize: '13px', fontWeight: '500'
     },
     logoutBtn: {

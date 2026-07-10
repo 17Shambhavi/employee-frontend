@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ProfilePhoto from './ProfilePhoto';
 
 function EmployeeDashboard({ token, employeeId, onLogout }) {
     const [activeTab, setActiveTab] = useState('profile');
@@ -135,8 +136,6 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
         { key: 'changepass', label: 'Change Password' }
     ];
 
-    const initials = profile?.name ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '';
-
     return (
         <div style={styles.container}>
             <style>{`
@@ -151,7 +150,7 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
                 <span style={styles.brand}>Employee Management System</span>
                 <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
                     <div style={styles.userBadge}>
-                        <span style={styles.avatar}>{initials}</span>
+                        <ProfilePhoto employeeId={employeeId} currentPhoto={profile?.profilePhoto} token={token} size={32} onUpdated={(p) => setProfile({ ...profile, profilePhoto: p })} />
                         <span>{profile?.name}</span>
                     </div>
                     <button className="nav-btn" style={styles.logoutBtn} onClick={onLogout}>Logout</button>
@@ -180,7 +179,13 @@ function EmployeeDashboard({ token, employeeId, onLogout }) {
 
                 {activeTab === 'profile' && profile && (
                     <div style={styles.card}>
-                        <h2 style={styles.cardTitle}>My Profile</h2>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '20px' }}>
+                            <ProfilePhoto employeeId={employeeId} currentPhoto={profile.profilePhoto} token={token} size={90} onUpdated={(p) => setProfile({ ...profile, profilePhoto: p })} />
+                            <div>
+                                <h2 style={{ ...styles.cardTitle, marginBottom: '4px' }}>{profile.name}</h2>
+                                <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>{profile.designation} · {profile.department}</p>
+                            </div>
+                        </div>
                         {[['Employee ID', profile.id], ['Name', profile.name], ['Department', profile.department], ['Designation', profile.designation], ['Email', profile.email], ['Mobile', profile.mobileNumber], ['Joining Date', profile.joiningDate]].map(([label, value]) => (
                             <div key={label} style={styles.profileRow}>
                                 <span style={styles.profileLabel}>{label}</span>
@@ -367,7 +372,6 @@ const styles = {
     navbar: { background: 'linear-gradient(135deg, #4f46e5, #6366f1)', color: 'white', padding: '16px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' },
     brand: { fontSize: '18px', fontWeight: '600', letterSpacing: '0.3px' },
     userBadge: { display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.15)', padding: '6px 14px 6px 6px', borderRadius: '20px', fontSize: '13px', fontWeight: '500' },
-    avatar: { width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700' },
     logoutBtn: { background: 'rgba(255,255,255,0.15)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', transition: 'all 0.2s' },
     tabBar: { background: 'white', padding: '12px 30px', display: 'flex', gap: '8px', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', flexWrap: 'wrap' },
     tabBtn: { border: 'none', padding: '10px 18px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', transition: 'all 0.2s' },
