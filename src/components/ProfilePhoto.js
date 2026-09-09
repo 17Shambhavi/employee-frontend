@@ -12,7 +12,7 @@ function ProfilePhoto({ employeeId, currentPhoto, token, onUpdated, size = 90 })
     const savePhoto = async (base64) => {
         setUploading(true);
         try {
-            await fetch(`https://employee-management-production-2291.up.railway.app/api/employee/profile/${employeeId}/photo`, {
+            await fetch(`https://employee-management-sb6o.onrender.com/api/employee/profile/${employeeId}/photo`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                 body: JSON.stringify({ photo: base64 })
