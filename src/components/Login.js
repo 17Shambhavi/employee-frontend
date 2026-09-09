@@ -20,7 +20,7 @@ function Login({ onLogin }) {
         setError('');
         setLoading(true);
         try {
-            const res = await fetch('https://employee-management-sb6o.onrender.com', {
+            const res = await fetch('https://employee-management-sb6o.onrender.com/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
